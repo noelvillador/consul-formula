@@ -12,9 +12,40 @@
         },
         'x86_64': {
             "arch": 'amd64'
-        }
+        },
+        'AMD64': {
+            "arch": 'amd64'
+        },
   }
   ,grain="cpuarch"
+  ,merge=consul)
+%}
+
+{% set consul = salt['grains.filter_by']({
+    'RedHat': {
+      'temp_dir': '/tmp',
+      'bin_dir': '/usr/local/bin',
+      'config_dir': '/etc/consul.d',
+      'runtime_dir': '/var/consul',
+      'os': 'linux',
+      'file_ext': '',
+      'config': {'data_dir': '/usr/local/share/consul'},
+      'nssm_version': '2.24',
+      'nssm_hash': 'be7b3577c6e3a280e5106a9e9db5b3775931cefc',
+    },
+    'Windows': {
+      'temp_dir': 'c:/Windows/Temp',
+      'bin_dir': 'c:/consul.io/bin',
+      'config_dir': 'c:/consul.io/conf',
+      'runtime_dir': 'c:/consul.io/var',
+      'os': 'windows',
+      'file_ext': '.exe',
+      'config': {'data_dir': 'c:/consul.io/data'},
+      'nssm_version': '2.24',
+      'nssm_hash': 'be7b3577c6e3a280e5106a9e9db5b3775931cefc',
+    }
+  }
+  ,grain="os_family"
   ,merge=consul)
 %}
 

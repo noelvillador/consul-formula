@@ -6,7 +6,6 @@ consul:
   config:
     server: false
     bind_addr: 0.0.0.0
-    data_dir: /var/consul
     ui: true
     enable_debug: false
     log_level: info
