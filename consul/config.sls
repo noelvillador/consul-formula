@@ -25,8 +25,8 @@ consul-script-install-{{ loop.index }}:
 {% if grains['os'] != 'Windows' %}
     - user: consul
     - group: consul
-{% endif %}
     - mode: 0755
+{% endif %}
 {% endfor %}
 
 consul-script-config:
