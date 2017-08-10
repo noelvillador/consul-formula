@@ -58,5 +58,5 @@ consul-check-config:
       - service: consul
     {% endif %}
     - context:
-      register: |
+      register_checks: |
         {{ consul.register_checks | json }}
