@@ -48,7 +48,7 @@ consul-download:
     - unless: test -f {{ consul.bin_dir }}/consul-{{ consul.version }}
 {% else %}
     - unless: |
-        powershell -command "& { if(Test-Path {{ consul.bin_dir }}/consul-{{ consul.version }} }{ exit 1 } else { exit 0 }  }"
+        powershell -command "& { if(Test-Path {{ consul.bin_dir }}/consul-{{ consul.version }} }{ exit 0 } else { exit 1 }  }"
 {% endif %}
 
 consul-extract:
@@ -60,7 +60,7 @@ consul-extract:
     - unless: test -f {{ consul.bin_dir }}/consul-{{ consul.version }}
 {% else %}
     - unless: |
-        powershell -command "& { if(Test-Path {{ consul.bin_dir }}/consul-{{ consul.version }} }{ exit 1 } else { exit 0 }  }"
+        powershell -command "& { if(Test-Path {{ consul.bin_dir }}/consul-{{ consul.version }} }{ exit 0 } else { exit 1 }  }"
 {% endif %}
 
 consul-install:
