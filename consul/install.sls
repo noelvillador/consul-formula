@@ -47,7 +47,7 @@ consul-download:
 {% if grains['os'] != 'Windows' %}
     - unless: test -f {{ consul.bin_dir }}/consul-{{ consul.version }}
 {% else %}
-    - unless: cmd /c 'IF EXISTS {{ consul.bin_dir }}/consul-{{ consul.version }}.exe EXIT 1'
+    - unless: powershell -command "& { if(Test-Path {{ consul.bin_dir }}/consul-{{ consul.version }}.exe ){ exit 0 } else { exiit 1 } }"
 {% endif %}
 
 consul-extract:
@@ -58,7 +58,7 @@ consul-extract:
 {% if grains['os'] != 'Windows' %}
     - unless: test -f {{ consul.bin_dir }}/consul-{{ consul.version }}
 {% else %}
-    - unless: cmd /c 'IF EXISTS {{ consul.bin_dir }}/consul-{{ consul.version }}.exe EXIT 1'
+    - unless: powershell -command "& { if(Test-Path {{ consul.bin_dir }}/consul-{{ consul.version }}.exe ){ exit 0 } else { exiit 1 } }"
 {% endif %}
 
 consul-install:
