@@ -11,6 +11,7 @@ while($true){
             where {$_.Name -eq $app } | ` 
             foreach {"$($_.WriteTransferCount)"} 
 
+        echo "running check for $($path)\$($app) log fie in  $($env:TEMP) "
         $new_value    | Out-File "$($env:TEMP)\$($app).log"  -Force 
 
         echo "new value $($new_value) vs old value $($previous_value)"

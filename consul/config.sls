@@ -36,7 +36,7 @@ consul-script-config:
     - template: jinja
     {% if consul.service != False %}
     - watch_in:
-       - service: consul
+      - service: consul
     {% endif %}
 {% if grains['os'] != 'Windows' %}
     - user: consul
@@ -47,3 +47,16 @@ consul-script-config:
     - context:
         register: |
           {{ consul.register | json }}
+
+consul-check-config:
+  file.managed:
+    - source: salt://{{ slspath }}/files/checks.json
+    - name: {{ consul.config_dir }}/checks.json
+    - template: jinja
+    {% if consul.service != False %}
+    - watch_in:
+      - service: consul
+    {% endif %}
+    - context:
+      register: |
+        {{ consul.register_checks | json }}
