@@ -2,7 +2,11 @@ param(
   [string]$path = '',
   [string]$app = ''
 )
-while($true){
+if(Get-Process $app.Replace(".exe","") -ErrorAction SilentlyContinue){
+    if ($app.Contains("MessageManager") -or $app.Contains("PAFI") -or $app.Contains("Pafi_Wrapper")){
+        echo "app is running"
+        exit 0;
+    }
     if (((Get-ChildItem $path ).count) -gt 1) { 
         if (Test-Path "$($env:TEMP)\$($app).log") { 
             $previous_value = Get-Content "$($env:TEMP)\$($app).log" 
@@ -23,5 +27,11 @@ while($true){
             exit 1;
         } 
     
-    } 
+    }else{
+        echo "no files in project folder"
+        exit 1;
+    }
+}else{
+        echo "app not running"
+        exit 1;
 }
