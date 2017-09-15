@@ -1,37 +1,50 @@
-param(
-  [string]$path = '',
-  [string]$app = ''
-)
-if(Get-Process $app.Replace(".exe","") -ErrorAction SilentlyContinue){
-    if ($app.Contains("MessageManager") -or $app.Contains("PAFI") -or $app.Contains("Pafi_Wrapper")){
-        echo "app is running"
+
+Param
+	(
+		[Parameter(Mandatory=$True, HelpMessage="Specify the location of the process to monitor")]
+		[string]$Path,
+		[Parameter(Mandatory=$True, HelpMessage="Specify the filename of the process to monitor")]
+		[string]$App,
+		[Parameter(Mandatory=$False, HelpMessage="Specify the filename of the sub-process to monitor")]
+		[string]$SubApp="GenericScanner",
+		[Parameter(Mandatory=$False, HelpMessage="Specify if module needs restart when terminated")]
+		[bool]$ReStart = $False,
+		[Parameter(Mandatory=$False, HelpMessage="Specify if force restart")]
+		[bool]$Force = $False,
+        [Parameter(Mandatory=$False, HelpMessage="Specify if you want to be notify when something is down.")]
+		[bool]$NotifyByEmail = $False,	
+		[Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]
+		[int]$Threshold = 5
+	)
+
+
+    Import-Module .\PSCommon.psm1
+    Write-Host 'Monitoring started'
+	$result = Get-GridProcessRunningOkay -Path $Path -App $App -SubApp $SubApp -ReStart $ReStart -Force $Force -Threshold $Threshold
+    if($result)
+    {
+        Write-Host "Result is okay."
         exit 0;
     }
-    if (((Get-ChildItem $path ).count) -gt 1) { 
-        if (Test-Path "$($env:TEMP)\$($app).log") { 
-            $previous_value = Get-Content "$($env:TEMP)\$($app).log" 
-        } 
-        $new_value = Get-WmiObject Win32_Process -ComputerName "127.0.0.1" | ` 
-            where {$_.Name -eq $app } | ` 
-            foreach {"$($_.WriteTransferCount)"} 
-
-        echo "running check for $($path)\$($app) log fie in  $($env:TEMP) "
-        $new_value    | Out-File "$($env:TEMP)\$($app).log"  -Force 
-
-        echo "new value $($new_value) vs old value $($previous_value)"
-
-        if ($new_value -ne $previous_value) { 
-            exit 0;
-        } 
-        else { 
-            exit 1;
-        } 
-    
-    }else{
-        echo "no files in project folder"
+    else
+    {
+        Write-Host "Sending email."
+        if($NotifyByEmail)
+        {
+            Start-SendEmail -EmailTo "romano_cabral@trendmicro.com"
+        }
         exit 1;
     }
-}else{
-        echo "app not running"
-        exit 1;
-}
+    Write-Host 'Monitoring ended'
+
+
+<#
+Param
+	(
+		[Parameter(Mandatory=$True, HelpMessage="Specify the location of the process to monitor")]
+		[string]$Path		
+	)
+
+	Import-Module .\PSCommon.psm1
+	Get-GridStringHash $Path
+#>

@@ -26,6 +26,12 @@
         PS C:\> Write-Log -Message 'Value1' 
         This example shows how to call the Write-Log function with named parameters. 
     #>
+
+
+
+# Global Variable
+$PSLogTrace=""
+
 function Write-Log 
 { 
      
@@ -41,7 +47,6 @@ function Write-Log
     { 
         $DateTime = Get-Date -Format ‘MM-dd-yy HH:mm:ss’ 
         $Invocation = "$($MyInvocation.MyCommand.Source | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)" 
-        #Add-Content -Value "$DateTime - $Invocation - $Message" -Path "$([environment]::GetEnvironmentVariable('TEMP', 'Machine'))\ScriptLog.log" 
 		Add-Content -Value "$DateTime - $Invocation - $Message" -Path $FileName
     } 
     catch 
@@ -54,7 +59,7 @@ function Write-Log
 
 <#
 .DESCRIPTION
-Converts the given string to hash.
+Converts the given string to hash equivalent.
 
 .Return
 hash
@@ -75,12 +80,16 @@ function Get-GridStringHash
 		[string]$HashName = "MD5"
 	) 
 	 
+    Write-Log "GridStringHash IN: $($String)" $Global:PSLogTrace
+
 	$StringBuilder = New-Object System.Text.StringBuilder 
 	[System.Security.Cryptography.HashAlgorithm]::Create($HashName).ComputeHash([System.Text.Encoding]::UTF8.GetBytes($String))|%{ 
 	[Void]$StringBuilder.Append($_.ToString("x2")) 
 	}
 	 
 	$result = $StringBuilder.ToString()
+
+    Write-Log "GridStringHash OUT: $($result)" $Global:PSLogTrace
 		
 	# return
 	$result 
@@ -93,6 +102,9 @@ Returns the filename of format md5.log for a given path.
 
 .Return
 env:\temp\md5.log
+
+.Note
+Do not put logging here as value of PSLog is not yet set.
  
 .Tested
 Yes
@@ -136,6 +148,8 @@ function Get-GridIsWithinThreshold
 		[int]$Threshold
 	)
 
+    Write-Log "GridIsWithinThreshold IN: $($Date) $($Threshold)" $Global:PSLogTrace
+
 	$Current = Get-Date
 	$TimeDiff = $Current.Subtract($Date)
 
@@ -147,7 +161,10 @@ function Get-GridIsWithinThreshold
 	#echo "Threshold=$($Threshold) vs. Min=$($min)"
 
 	# prepare return
-	( ($hr -gt 1) -or ($Threshold -gt $min) -or ($Threshold -eq $min) )
+	$result = ( ($hr -gt 1) -or ($Threshold -gt $min) -or ($Threshold -eq $min) )
+
+    Write-Log "GridIsWithinThreshold OUT: $($result)" $Global:PSLogTrace
+
 }
 
 <#
@@ -167,6 +184,8 @@ function Start-GridModule
 		[string]$App
 	)	 
 
+    Write-Log "Start-GridModule OUT: $($Path) $($App)" $Global:PSLogTrace
+
 	# Confirm path is valid
     if (!(Test-Path $Path))
     {
@@ -181,6 +200,7 @@ function Start-GridModule
 			$procName = "$path\$app"
 			if (Test-Path $procName)
 			{ 
+                Write-Log "$MyInvocation.MyCommand Starting $($procName)" $Global:PSLogTrace
 				#echo "Starting module: " $procName
 				Start-Process $procName
 				Start-Sleep -Seconds 2
@@ -188,9 +208,12 @@ function Start-GridModule
 		}
 		else
 		{
+            Write-Log "$MyInvocation.MyCommand No files found in $($Path)" $Global:PSLogTrace
 			Write-Error 'No files found in $($Path).'
 		}	
-	}	
+	}
+
+    Write-Log "Start-GridModule OUT:" $Global:PSLogTrace	
 }
 
 
@@ -219,10 +242,12 @@ function ReStart-GridModule
 		[Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]
 		[int]$Threshold = 5
 	)
+
+    Write-Log 'Get-GridProcessRunningOkay IN:' $Global:PSLogTrace
 	
 	$restart = $False
 
-	$temp = Test-Path $Path | Out-Null
+	$temp = Test-Path $Path
 	if($temp)
 	{
 		if(((Get-ChildItem $Path).count) -gt 1)
@@ -245,6 +270,7 @@ function ReStart-GridModule
 				# force restart?
 				if($Force)
 				{
+                    Write-Log 'Get-GridProcessRunningOkay: Force-ReStart.' $PSLogTrace
 					Start-GridModule $Path $App
 					$restart = $True
 				}
@@ -252,10 +278,11 @@ function ReStart-GridModule
 				{					
 					# consider timestamp
 					$logFile = Get-GridComputeFileNameFromString $Path
-					Write-Host $logFile
+                    Write-Log "Get-GridProcessRunningOkay: Checking previous timestamp from file $($logFile)" $Global:PSLogTrace
 
 					if( !(Test-Path $logFile))
 					{
+                        Write-Log "No previous file, restart the app" $Global:PSLogTrace
 						# restart
 						$restart = $True
 					}
@@ -271,6 +298,8 @@ function ReStart-GridModule
 
 					if($restart)
 					{
+
+                        Write-Log "Restarting app $($App)" $Global:PSLogTrace
 						Start-GridModule $Path $App
 
 						# update time
@@ -278,7 +307,7 @@ function ReStart-GridModule
 					}
 					else
 					{
-						Write-Host 'Rejected: Recently restarted.'						
+                        Write-Log "GridProcessRunningOkay: Rejected, recently restarted." $Global:PSLogTrace
 					}		 
 				}
 			}
@@ -306,6 +335,8 @@ function Stop-GridProcessByName
 		[string]$App
 	)
 
+    Write-Log "Stop-GridProcessByName IN: $($App)" $Global:PSLogTrace
+
 	# remove extension
 	$processName = [IO.Path]::GetFileNameWithoutExtension($App)
 
@@ -326,6 +357,8 @@ function Stop-GridProcessByName
 		}
 	}
 
+    Write-Log "Stop-GridProcessByName OUT:" $Global:PSLogTrace
+
 	Start-Sleep -Seconds 2
 }
 
@@ -344,8 +377,12 @@ function Stop-GridProcessByPath
 		[Parameter(Mandatory=$True, HelpMessage="Specify the path of the process")]
 		[string]$Path		
 	)
+    
+    Write-Log "Stop-GridProcessByPath IN: $($Path)" $Global:PSLogTrace
 
 	Get-Process | Where-Object {$_.Path -like $Path} | Stop-Process
+
+    Write-Log "GridProcessByPath OUT:" $Global:PSLogTrace
 }
 
 
@@ -367,7 +404,9 @@ function Save-GridTimeStampToATempFile
 		[string]$Path				
 	)
 
+    Write-Log "Save-GridTimeStampToATempFile IN: $($Path)" $Global:PSLogTrace
 	Get-Date -Format 'M.d.yyyy HH:mm:ss' | Out-File $Path -Force -NoNewline
+    Write-Log "Save-GridTimeStampToATempFile OUT:" $Global:PSLogTrace
 }
 
 
@@ -390,7 +429,11 @@ function Save-GridDataToATempFile
 		[string]$Data				
 	)
 
+    Write-Log "Save-GridDataToATempFile IN: $($Path) $($Data)" $Global:PSLogTrace
+
 	$Data | Out-File $Path -Force -NoNewline
+
+    Write-Log "Save-GridDataToATempFile OUT:" $Global:PSLogTrace
 }
 
 
@@ -493,6 +536,8 @@ function Get-GridIsModuleHangUp
 						
 	)
 
+    Write-Log "GridIsModuleHangUp IN: $($ProcessName)" $Global:PSLogTrace
+
 	# iterate for all process instance
 
 	$result = $false
@@ -520,6 +565,9 @@ function Get-GridIsModuleHangUp
         }
     }
 
+    Write-Log "GridIsModuleHangUp OUT:" $Global:PSLogTrace
+
+    # return
 	$result
 }
 
@@ -544,6 +592,8 @@ function Get-GridIsUpdating
 		[Parameter(Mandatory=$True, HelpMessage="Specify the process name.")]
 		[int]$App				
 	)
+
+    Write-Log "GridIsUpdating IN: $($Path) $($App)" $Global:PSLogTrace
 	
 	 # initialize return value
 	 $state = $false
@@ -576,6 +626,8 @@ function Get-GridIsUpdating
 
 	 # update the value to the file
 	 Save-GridDataToATempFile $logName $new_value
+    
+    Write-Log "GridIsUpdating OUT: $($state)" $Global:PSLogTrace
 
 	 # return
 	 $state
@@ -591,6 +643,8 @@ function Get-GridIsModuleRunning
 		[string]$App
 	)
 
+    Write-Log "GridIsModuleRunning IN: $($App)" $Global:PSLogTrace
+
 	# remove extension
 	$processName = [IO.Path]::GetFileNameWithoutExtension($App)
 
@@ -601,6 +655,8 @@ function Get-GridIsModuleRunning
 	{
 		$result = $True
 	}
+
+    Write-Log "GridIsModuleRunning OUT: $($result)" $Global:PSLogTrace
 
 	$result
 }
@@ -620,15 +676,18 @@ function Get-GridProcessRunningOkay
 		[string]$App,
 		[Parameter(Mandatory=$False, HelpMessage="Specify the filename of the sub-process to monitor")]
 		[string]$SubApp="GenericScanner",
+		[Parameter(Mandatory=$False, HelpMessage="Specify if module needs restart when terminated")]
+		[bool]$ReStart = $False,
 		[Parameter(Mandatory=$False, HelpMessage="Specify if force restart")]
 		[bool]$Force = $False,	
 		[Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]
 		[int]$Threshold = 5
 	)	
 
-	$logName = Get-GridComputeFileNameFromString $Path -Marker 'trace'
+    # set global variable
+	$Global:PSLogTrace = Get-GridComputeFileNameFromString $Path -Marker 'trace'
 
-	Write-Log 'Get-GridProcessRunningOkay' $logName 
+	Write-Log "Get-GridProcessRunningOkay IN:" $Global:PSLogTrace 
 
 	# check if module is running, run otherwise
 	$result = Get-GridIsModuleRunning $App
@@ -636,27 +695,56 @@ function Get-GridProcessRunningOkay
 	{
 		if(($App.Contains("MessageManager")) -or ($App.Contains("PafiWrapper")))
 		{
-			Write-Log 'App is either MM or PAFIWrapper' $logName
+			Write-Log "App $($App) is updating." $PSLogTrace
 			return $True
 		}
 		elseif($App.Contains("PAFI") -and (-not(Get-GridIsModuleHangUp $SubApp $Threshold)))
 		{
-			Write-Log 'App is PAFI and running.' $logName
+			Write-Log "App $($App) is running." $Global:PSLogTrace
 			return $True
 		}
 		elseif( Get-GridIsUpdating $Path $App )
 		{
-			Write-Log 'App is updating.' $logName
+			Write-Log "App $($App) is updating." $Global:PSLogTrace
 			return $True
 		}
 		else
 		{
-			# unknown here
+			Write-Log 'unknown' $Global:PSLogTrace
 		}
 	}
 
-	Write-Log "Restarting the application $($App)" $logName
+    # try to restart
+	if($ReStart)
+	{
+		Write-Log "Restarting the application $($App)" $Global:PSLogTrace
+		return ReStart-GridModule $Path $App $SubApp $Force $Threshold
+	}
 
-	# try to restart
-	return ReStart-GridModule $Path $App $SubApp $Force $Threshold
+    Write-Log "Get-GridProcessRunningOkay OUT" $Global:PSLogTrace
+
+}
+
+<#
+Send email.
+#>
+function Start-SendEmail
+{
+	Param
+	(
+		[Parameter(Mandatory=$False, HelpMessage="Specify the SMTP server")]
+		[string]$Server= "192.168.18.186" ,
+		[Parameter(Mandatory=$False, HelpMessage="Specify the email subject")]
+		[string]$Subject="Server/App is down",
+		[Parameter(Mandatory=$False, HelpMessage="Specify the email recipients")]
+		[string]$EmailTo="noel_villador@trendmicro.com, joanne_antido@trendmicro.com"
+	)
+
+    Write-Log "SendEmail IN: " $Global:PSLogTrace
+
+	Write-Host "Sending email..." 
+    $emailFrom = "grid@trendmicro.com"  
+    Send-MailMessage -From $emailFrom -To $EmailTo -Body $Subject -Subject $Subject -SmtpServer $Server
+
+    Write-Log "SendEmail OUT: " $Global:PSLogTrace
 }
