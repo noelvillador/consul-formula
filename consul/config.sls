@@ -21,7 +21,7 @@ consul-script-install-{{ loop.index }}:
   file.managed:
     - source: {{ script.source }}
     - name: {{ script.name }}
-{% if scripts.template %}
+{% if script.template %}
     - template: jinja
 {% endif %}
 {% if grains['os'] != 'Windows' %}
