@@ -32,6 +32,9 @@
 # Global Variable
 $PSLogTrace=""
 
+
+# Note: $MyInvocation is an automatic variable populated at script run time, 
+# then if you execute $MyInvocation.MyCommand.Path in a powershell console or ISE isn't populated;
 function Write-Log 
 { 
      
@@ -46,8 +49,8 @@ function Write-Log
     try 
     { 
         $DateTime = Get-Date -Format ‘MM-dd-yy HH:mm:ss’ 
-        $Invocation = "$($MyInvocation.MyCommand.Source | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)" 
-		Add-Content -Value "$DateTime - $Invocation - $Message" -Path $FileName
+        #$Invocation = "$($MyInvocation.MyCommand.Source | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)" 
+		Add-Content -Value "$DateTime - $Message" -Path $FileName
     } 
     catch 
     { 
@@ -67,6 +70,10 @@ hash
 .Source
 #http://jongurgul.com/blog/get-stringhash-get-filehash/ 
 
+
+.Note
+Do not put log here as PSLogTrace is not yet set.
+
 .Tested
 Yes
 #>
@@ -80,7 +87,7 @@ function Get-GridStringHash
 		[string]$HashName = "MD5"
 	) 
 	 
-    Write-Log "GridStringHash IN: $($String)" $Global:PSLogTrace
+    #Write-Log "GridStringHash IN: $($String)" $Global:PSLogTrace
 
 	$StringBuilder = New-Object System.Text.StringBuilder 
 	[System.Security.Cryptography.HashAlgorithm]::Create($HashName).ComputeHash([System.Text.Encoding]::UTF8.GetBytes($String))|%{ 
@@ -89,7 +96,7 @@ function Get-GridStringHash
 	 
 	$result = $StringBuilder.ToString()
 
-    Write-Log "GridStringHash OUT: $($result)" $Global:PSLogTrace
+    #Write-Log "GridStringHash OUT: $($result)" $Global:PSLogTrace
 		
 	# return
 	$result 
@@ -119,6 +126,7 @@ function Get-GridComputeFileNameFromString
 		[Parameter(Mandatory=$False, HelpMessage="String to append to filename")]
 		[string]$Marker='marker'
 	) 
+
 
 	$Md5 = Get-GridStringHash $Path
 	"$($env:TEMP)\$($Md5)-$($Marker).log"
@@ -590,7 +598,7 @@ function Get-GridIsUpdating
 		[Parameter(Mandatory=$True, HelpMessage="Specify the path of process running.")]
 		[string]$Path,
 		[Parameter(Mandatory=$True, HelpMessage="Specify the process name.")]
-		[int]$App				
+		[string]$App				
 	)
 
     Write-Log "GridIsUpdating IN: $($Path) $($App)" $Global:PSLogTrace
@@ -695,7 +703,7 @@ function Get-GridProcessRunningOkay
 	{
 		if(($App.Contains("MessageManager")) -or ($App.Contains("PafiWrapper")))
 		{
-			Write-Log "App $($App) is updating." $PSLogTrace
+			Write-Log "App $($App) is updating." $Global:PSLogTrace
 			return $True
 		}
 		elseif($App.Contains("PAFI") -and (-not(Get-GridIsModuleHangUp $SubApp $Threshold)))
