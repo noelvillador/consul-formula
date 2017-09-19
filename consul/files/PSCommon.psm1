@@ -611,6 +611,7 @@ function Get-GridIsUpdating
      $exists = Test-Path $logName | Out-Null
      if(!($exists))
      {
+         Write-Log "GridIsUpdating: No previous file found." $Global:PSLogTrace
          $exists = $null
          # if no prev value, let's assume it is updating...
          $state = $True
@@ -619,14 +620,24 @@ function Get-GridIsUpdating
      {
          $exists = $null
          $previous_value = Get-Content $logName
-         Write-Host "new value $($new_value) vs old value $($previous_value)"
+         Write-Log "GridIsUpdating: new value $($new_value) vs old value $($previous_value)" $Global:PSLogTrace
 
          # compare the value
          $state = ($new_value -ne $previous_value)
      }
 
+
+     <#
+        Todo: $new_value is an array, so there is an error to convert it to string during saving.
+        For now, let's assume it is index 0
+     #>
+     
      # update the value to the file
-     Save-GridDataToATempFile $logName $new_value
+     if($new_value.Length -gt 0)
+     {
+        Save-GridDataToATempFile $logName $new_value[0].ToString()
+     }
+     
     
     Write-Log "GridIsUpdating OUT: $($state)" $Global:PSLogTrace
 
