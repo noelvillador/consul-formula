@@ -205,7 +205,8 @@ function Start-GridModule
             { 
                 Write-Log "$MyInvocation.MyCommand Starting $($procName)" $Global:PSLogTrace
                 #echo "Starting module: " $procName
-                Start-Process $procName
+                #Start-Process $app -WorkingDirectory $path
+                Start-ScheduledTask $App
                 Start-Sleep -Seconds 2
             }
         }
@@ -273,7 +274,7 @@ function ReStart-GridModule
                 # force restart?
                 if($Force)
                 {
-                    Write-Log 'Get-GridProcessRunningOkay: Force-ReStart.' $PSLogTrace
+                    Write-Log 'Get-GridProcessRunningOkay: Force-ReStart.' $Global:PSLogTrace
                     Start-GridModule $Path $App
                     $restart = $True
                 }
@@ -762,3 +763,4 @@ function Start-SendEmail
 
     Write-Log "SendEmail OUT: " $Global:PSLogTrace
 }
+
