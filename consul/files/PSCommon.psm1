@@ -25,6 +25,8 @@
     .EXAMPLE 
         PS C:\> Write-Log -Message 'Value1' 
         This example shows how to call the Write-Log function with named parameters. 
+    .SOURCE
+        https://gallery.technet.microsoft.com/scriptcenter/Write-Log-A-Simple-Logging-52827c98
     #>
 
 
@@ -46,7 +48,7 @@ function Write-Log
     try 
     { 
         Write-Host "FileName is $($FileName)"
-        $DateTime = Get-Date -Format ‘MM-dd-yy HH:mm:ss’ 
+        $DateTime = Get-Date -Format 'MM-dd-yy HH:mm:ss' 
         #$Invocation = "$($MyInvocation.MyCommand.Source | Split-Path -Leaf):$($MyInvocation.ScriptLineNumber)" 
         Add-Content -Path $FileName -Value "$DateTime - $Message"
     } 
