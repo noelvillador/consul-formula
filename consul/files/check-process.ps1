@@ -8,11 +8,11 @@ Param
         [Parameter(Mandatory=$False, HelpMessage="Specify the filename of the sub-process to monitor")]
         [string]$SubApp="GenericScanner",
         [Parameter(Mandatory=$False, HelpMessage="Specify if module needs restart when terminated")]
-        [bool]$ReStart = $False,
+        [bool]$ReStart = $True,
         [Parameter(Mandatory=$False, HelpMessage="Specify if force restart")]
-        [bool]$Force = $False,
+        [bool]$Force = $True,
         [Parameter(Mandatory=$False, HelpMessage="Specify if you want to be notify when something is down.")]
-        [bool]$NotifyByEmail = $False,    
+        [bool]$NotifyByEmail = $True,    
         [Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]
         [int]$Threshold = 5,
         [Parameter(Mandatory=$False, HelpMessage="Specify the location of the script module")]
@@ -30,9 +30,10 @@ Param
     }
     else
     {
-        Write-Host "Sending email."
+        Write-Host "Result is not okay."        
         if($NotifyByEmail)
         {
+            Write-Host "Sending email."
             Start-SendEmail
         }
         exit 1;
