@@ -8,9 +8,9 @@ Param
         [Parameter(Mandatory=$False, HelpMessage="Specify the filename of the sub-process to monitor")]
         [string]$SubApp="GenericScanner",
         [Parameter(Mandatory=$False, HelpMessage="Specify if module needs restart when terminated")]
-        [bool]$ReStart = $True,
+        [bool]$ReStart = $False,
         [Parameter(Mandatory=$False, HelpMessage="Specify if force restart")]
-        [bool]$Force = $True,
+        [bool]$Force = $False,
         [Parameter(Mandatory=$False, HelpMessage="Specify if you want to be notify when something is down.")]
         [bool]$NotifyByEmail = $True,    
         [Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]

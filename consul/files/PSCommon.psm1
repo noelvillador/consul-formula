@@ -748,7 +748,7 @@ function Start-SendEmail
     Param
     (
         [Parameter(Mandatory=$False, HelpMessage="Specify the SMTP server")]
-        [string]$Server= "192.168.18.186" ,
+        [string]$Server= "192.168.13.1" ,
         [Parameter(Mandatory=$False, HelpMessage="Specify the email subject")]
         [string]$Subject="Server/App is down",
         [Parameter(Mandatory=$False, HelpMessage="Specify the email recipients")]
