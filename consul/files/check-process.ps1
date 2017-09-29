@@ -1,53 +1,69 @@
 
 Param
-    (
-        [Parameter(Mandatory=$True, HelpMessage="Specify the location of the process to monitor")]
-        [string]$Path,
-        [Parameter(Mandatory=$True, HelpMessage="Specify the filename of the process to monitor")]
-        [string]$App,
-        [Parameter(Mandatory=$False, HelpMessage="Specify the filename of the sub-process to monitor")]
-        [string]$SubApp="GenericScanner",
-        [Parameter(Mandatory=$False, HelpMessage="Specify if module needs restart when terminated")]
-        [bool]$ReStart = $False,
-        [Parameter(Mandatory=$False, HelpMessage="Specify if force restart")]
-        [bool]$Force = $False,
-        [Parameter(Mandatory=$False, HelpMessage="Specify if you want to be notify when something is down.")]
-        [bool]$NotifyByEmail = $True,    
-        [Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]
-        [int]$Threshold = 5,
-        [Parameter(Mandatory=$False, HelpMessage="Specify the location of the script module")]
-        [string]$ScriptModulePath="C:\consul.io\conf"
-    )
+(
+    [Parameter(Mandatory=$True, HelpMessage="Specify the location of the process to monitor")]
+    [string]$Path,
+    [Parameter(Mandatory=$True, HelpMessage="Specify the filename of the process to monitor")]
+    [string]$App,
+    [Parameter(Mandatory=$False, HelpMessage="Specify the filename of the sub-process to monitor")]
+    [string]$SubApp="GenericScanner",
+    [Parameter(Mandatory=$False, HelpMessage="Specify if module needs restart when terminated")]
+    [bool]$ReStart = $False,
+    [Parameter(Mandatory=$False, HelpMessage="Specify if force restart")]
+    [bool]$Force = $False,
+    [Parameter(Mandatory=$False, HelpMessage="Specify the threshold in minutes before restarting an application")]
+    [int]$Threshold = 5,
+    [Parameter(Mandatory=$False, HelpMessage="Specify the location of the script module")]
+    [string]$ScriptModulePath="C:\consul.io\conf",
+    [Parameter(Mandatory=$False, HelpMessage="Specify the SMTP server")]
+    [string]$Server,
+    [Parameter(Mandatory=$False, HelpMessage="Specify the email recipients")]
+    [string]$EmailTo,
+    [Parameter(Mandatory=$False, HelpMessage="Specify the email sender")]
+    [string]$EmailFrom
+)
 
+$emailCheckFile =  "$($env:TEMP)\$($App).email"
 
-    Import-Module C:\consul.io\conf\PSCommon.psm1 -PassThru -Force
-    Write-Host 'Monitoring started'
-    $result = Get-GridProcessRunningOkay -Path $Path -App $App -SubApp $SubApp -ReStart $ReStart -Force $Force -Threshold $Threshold
-    if($result)
+Import-Module C:\consul.io\conf\PSCommon.psm1 -PassThru -Force
+Write-Host 'Monitoring started'
+$result = Get-GridProcessRunningOkay -Path $Path -App $App -SubApp $SubApp -ReStart $ReStart -Force $Force -Threshold $Threshold
+if($result)
+{
+    Write-Host "Result is okay."
+    if([System.IO.File]::Exists($emailCheckFile))
     {
-        Write-Host "Result is okay."
-        exit 0;
+        Remove-Item $emailCheckFile
     }
-    else
+    exit 0;
+}
+else
+{
+    Write-Host "Result is not okay."        
+    if(-not([string]::IsNullOrEmpty($Server)) -and -not([string]::IsNullOrEmpty($EmailTo)) -and -not([string]::IsNullOrEmpty($EmailFrom)))
     {
-        Write-Host "Result is not okay."        
-        if($NotifyByEmail)
+        if (![System.IO.File]::Exists($emailCheckFile))
         {
             Write-Host "Sending email."
-            Start-SendEmail
+            Start-SendEmail -Server $Server -EmailTo $EmailTo -EmailFrom $EmailFrom -Subject "$($App) at $($env:computername) is down!!!"
+            echo $null >> $emailCheckFile
+        }else
+        {
+            Write-Host "sent email once, will not send again."
         }
-        exit 1;
     }
-    Write-Host 'Monitoring ended'
+    exit 1;
+}
+Write-Host 'Monitoring ended'
 
 
 <#
 Param
-    (
-        [Parameter(Mandatory=$True, HelpMessage="Specify the location of the process to monitor")]
-        [string]$Path        
-    )
+(
+    [Parameter(Mandatory=$True, HelpMessage="Specify the location of the process to monitor")]
+    [string]$Path        
+)
 
-    Import-Module $ScriptModulePath\PSCommon.psm1
-    Get-GridStringHash $Path
+Import-Module $ScriptModulePath\PSCommon.psm1
+Get-GridStringHash $Path
 #>

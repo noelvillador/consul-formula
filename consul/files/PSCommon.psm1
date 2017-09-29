@@ -708,12 +708,13 @@ function Get-GridProcessRunningOkay
     $result = Get-GridIsModuleRunning $App
     if($result)
     {
-        if(($App.Contains("MessageManager")) -or ($App.Contains("PafiWrapper")))
+        if(($App.Contains("MessageManager")) -or ($App.Contains("Wrapper")))
         {
             Write-Log "App $($App) is running." $Global:PSLogTrace            
             return $True
         }
-        elseif($App.Contains("PAFI") -and (-not(Get-GridIsModuleHangUp $SubApp $Threshold)))
+        #elseif($App.Contains("PAFI") -and (-not(Get-GridIsModuleHangUp $SubApp $Threshold)))
+        elseif($App.Contains("PAFI"))
         {
             Write-Log "App $($App) is running." $Global:PSLogTrace
             return $True
@@ -747,20 +748,23 @@ function Start-SendEmail
 {
     Param
     (
-        [Parameter(Mandatory=$False, HelpMessage="Specify the SMTP server")]
-        [string]$Server= "192.168.13.1" ,
-        [Parameter(Mandatory=$False, HelpMessage="Specify the email subject")]
-        [string]$Subject="Server/App is down",
-        [Parameter(Mandatory=$False, HelpMessage="Specify the email recipients")]
-        [string]$EmailTo="romano_cabral@trendmicro.com, noel_villador@trendmicro.com, joanne_antido@trendmicro.com"
+        
+        [Parameter(Mandatory=$True, HelpMessage="Specify the SMTP server")]
+        [string]$Server,
+        [Parameter(Mandatory=$True, HelpMessage="Specify the email recipients")]
+        [string]$EmailTo,
+        [Parameter(Mandatory=$True, HelpMessage="Specify the email sender")]
+        [string]$EmailFrom,
+        [Parameter(Mandatory=$True, HelpMessage="Specify the email subject")]
+        [string]$Subject
+        
     )
 
     Write-Log "SendEmail IN: " $Global:PSLogTrace
+    $emailTo = $EmailTo -split ","
 
     Write-Host "Sending email..." 
-    $emailFrom = "grid@trendmicro.com"  
-    Send-MailMessage -From $emailFrom -To $EmailTo -Body $Subject -Subject $Subject -SmtpServer $Server
+    Send-MailMessage -From $EmailFrom -To $EmailTo -Body $Subject -Subject $Subject -SmtpServer $Server
 
     Write-Log "SendEmail OUT: " $Global:PSLogTrace
 }
-
