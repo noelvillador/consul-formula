@@ -761,10 +761,10 @@ function Start-SendEmail
     )
 
     Write-Log "SendEmail IN: " $Global:PSLogTrace
-    $emailTo = $EmailTo -split ","
+    [string[]]$email = $EmailTo.split(",");
 
-    Write-Host "Sending email..." 
-    Send-MailMessage -From $EmailFrom -To $EmailTo -Body $Subject -Subject $Subject -SmtpServer $Server
+    Write-Host "Sending email... " 
+    Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server
 
     Write-Log "SendEmail OUT: " $Global:PSLogTrace
 }
