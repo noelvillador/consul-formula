@@ -20,11 +20,11 @@ Param
     [Parameter(Mandatory=$False, HelpMessage="Specify the email recipients")]
     [string]$EmailTo,
     [Parameter(Mandatory=$False, HelpMessage="Specify the email sender")]
-    [string]$EmailFrom
+    [string]$EmailFrom,
     [Parameter(Mandatory=$False, HelpMessage="Specify the mail user")]
-    [string]$Username
+    [string]$Username,
     [Parameter(Mandatory=$False, HelpMessage="Specify the mail password")]
-    [string]$Password
+    [string]$Password,
     [Parameter(Mandatory=$False, HelpMessage="Specify ssl option")]
     [string]$SSL
 )
