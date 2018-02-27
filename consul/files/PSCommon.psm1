@@ -757,14 +757,18 @@ function Start-SendEmail
         [string]$EmailFrom,
         [Parameter(Mandatory=$True, HelpMessage="Specify the email subject")]
         [string]$Subject
-        
+        [Parameter(Mandatory=$False, HelpMessage="Specify ssl parameter")]
+        [string]$SSL
+        [Parameter(Mandatory=$False, HelpMessage="Specify mail credentials")]
+        [System.Management.Automation.PSCredential]$Credentials
+
     )
 
     Write-Log "SendEmail IN: " $Global:PSLogTrace
     [string[]]$email = $EmailTo.split(",");
 
     Write-Host "Sending email... " 
-    Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server
+    Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server $SSL $Credentials
 
     Write-Log "SendEmail OUT: " $Global:PSLogTrace
 }
