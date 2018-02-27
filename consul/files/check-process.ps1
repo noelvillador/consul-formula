@@ -21,6 +21,12 @@ Param
     [string]$EmailTo,
     [Parameter(Mandatory=$False, HelpMessage="Specify the email sender")]
     [string]$EmailFrom
+    [Parameter(Mandatory=$False, HelpMessage="Specify the mail user")]
+    [string]$Username
+    [Parameter(Mandatory=$False, HelpMessage="Specify the mail password")]
+    [string]$Password
+    [Parameter(Mandatory=$False, HelpMessage="Specify ssl option")]
+    [string]$SSL
 )
 
 $emailCheckFile =  "$($env:TEMP)\$($App).email"
@@ -45,7 +51,11 @@ else
         if (![System.IO.File]::Exists($emailCheckFile))
         {
             Write-Host "Sending email."
-            Start-SendEmail -Server $Server -EmailTo $EmailTo -EmailFrom $EmailFrom -Subject "$($App) at $($env:computername) is down!!!"
+            if(-not([string]::IsNullOrEmpty($Password) -and -not([string]::IsNullOrEmpty($Username))
+            {
+              $EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username,$Password
+            }
+            Start-SendEmail -Credentials $EmailCredential -SSL $SSL -Server $Server -EmailTo $EmailTo -EmailFrom $EmailFrom -Subject "$($App) at $($env:computername) is down!!!"
             echo $null >> $emailCheckFile
         }else
         {
