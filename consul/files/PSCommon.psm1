@@ -760,7 +760,7 @@ function Start-SendEmail
         [Parameter(Mandatory=$False, HelpMessage="Specify ssl parameter")]
         [string]$SSL,
         [Parameter(Mandatory=$False, HelpMessage="Specify mail credentials")]
-        [System.Management.Automation.PSCredential]$Credentials
+        [PSCredential]$Credentials
 
     )
 
@@ -768,7 +768,14 @@ function Start-SendEmail
     [string[]]$email = $EmailTo.split(",");
 
     Write-Host "Sending email... " 
-    Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server $SSL $Credentials
+
+    if(-not([string]::IsNullOrEmpty($Server)))
+    {
+      Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server -UseSsl -Credential $Credentials
+    }else
+    {
+      Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server 
+    }
 
     Write-Log "SendEmail OUT: " $Global:PSLogTrace
 }
