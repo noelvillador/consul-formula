@@ -756,9 +756,9 @@ function Start-SendEmail
         [Parameter(Mandatory=$True, HelpMessage="Specify the email sender")]
         [string]$EmailFrom,
         [Parameter(Mandatory=$True, HelpMessage="Specify the email subject")]
-        [string]$Subject
+        [string]$Subject,
         [Parameter(Mandatory=$False, HelpMessage="Specify ssl parameter")]
-        [string]$SSL
+        [string]$SSL,
         [Parameter(Mandatory=$False, HelpMessage="Specify mail credentials")]
         [System.Management.Automation.PSCredential]$Credentials
 
