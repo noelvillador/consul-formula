@@ -51,9 +51,10 @@ else
         if (![System.IO.File]::Exists($emailCheckFile))
         {
             Write-Host "Sending email."
-            if(-not([string]::IsNullOrEmpty($Password) -and -not([string]::IsNullOrEmpty($Username))
+            if(-not([string]::IsNullOrEmpty($Password)) -and -not([string]::IsNullOrEmpty($Username)))
             {
-              $EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username,$Password
+              $UserPassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
+              $EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username,$UserPassword
             }
             Start-SendEmail -Credentials $EmailCredential -SSL $SSL -Server $Server -EmailTo $EmailTo -EmailFrom $EmailFrom -Subject "$($App) at $($env:computername) is down!!!"
             echo $null >> $emailCheckFile
