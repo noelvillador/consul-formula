@@ -26,7 +26,10 @@ Param
     [Parameter(Mandatory=$False, HelpMessage="Specify the mail password")]
     [string]$Password,
     [Parameter(Mandatory=$False, HelpMessage="Specify ssl option")]
-    [string]$SSL
+    [string]$SSL,
+    [Parameter(Mandatory=$False, HelpMessage="Specify data option")]
+    [string]$data
+    
 )
 
 $emailCheckFile =  "$($env:TEMP)\$($App).email"
@@ -56,7 +59,7 @@ else
               $UserPassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
               $EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username,$UserPassword
             }
-            Start-SendEmail -Credentials $EmailCredential -SSL $SSL -Server $Server -EmailTo $EmailTo -EmailFrom $EmailFrom -Subject "$($App) at $($env:computername) is down!!!"
+            Start-SendEmail -Credentials $EmailCredential -SSL $SSL -Server $Server -EmailTo $EmailTo -EmailFrom $EmailFrom -Subject "$($App) at $($env:computername) $($data) is down!!!"
             echo $null >> $emailCheckFile
         }else
         {
