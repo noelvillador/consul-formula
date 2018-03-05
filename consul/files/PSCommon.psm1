@@ -769,7 +769,7 @@ function Start-SendEmail
 
     Write-Host "Sending email... " 
 
-    if(-not([string]::IsNullOrEmpty($Server)))
+    if(-not([string]::IsNullOrEmpty($SSL)))
     {
       Send-MailMessage -From $EmailFrom -To $email -Body $Subject -Subject $Subject -SmtpServer $Server -UseSsl -Credential $Credentials
     }else
