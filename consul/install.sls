@@ -86,10 +86,10 @@ consul-link:
 # Install nssm for windows service
 {% if grains['os'] == 'Windows' %}
 nssm-download:
-  file.managed:
-    - name: {{ consul.temp_dir }}/nssm_{{ consul.nssm_version }}.zip
-    - source: http://nssm.cc/release/nssm-{{ consul.nssm_version }}.zip
-    - source_hash: {{ consul.nssm_hash }}
+  module.run:
+    - name: cmd.powershell
+    - cmd: $base64 = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("{{ salt['pillar.get']('jenkins:user', 'acct') }}:{{ salt['pillar.get']('jenkins:password','123') }}"));$headers = @{ Authorization = "Basic $base64" };Invoke-WebRequest -uri "http://{{ salt['pillar.get']('jenkins:server', '127.0.0.1') }}:{{ salt['pillar.get']('jenkins:port', '8080') }}/userContent/nssm-{{ consul.nssm_version }}.zip" -Headers $headers -Method Get -OutFile "{{ consul.temp_dir }}/nssm_{{ consul.nssm_version }}.zip"
+    - onlyif: powershell -command "& { if(Test-Path {{ consul.temp_dir }}/nssm_{{ consul.nssm_version }}.zip){ exit 1 } else { exit 0 }  } "
 
 nssm-extract:
   archive.extracted:
