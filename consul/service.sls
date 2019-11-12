@@ -16,6 +16,10 @@ consul-init-file:
     - source: salt://{{ slspath }}/files/consul.sysvinit
     - name: /etc/init.d/consul
     - mode: 0755
+
+consul-chkconfig:
+  cmd.run:
+    - name: "chkconfig --add consul"
     {%- endif %}
 
 {% else %}
@@ -67,10 +71,6 @@ Ensure Consul firewall UDP port is open:
 {% endif %}
 
 {%- if consul.service %}
-consul-chkconfig:
-  cmd.run:
-    - name: "chkconfig --add consul"
-
 consul-service:
   service.running:
     - name: consul
