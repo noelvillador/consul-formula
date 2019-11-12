@@ -67,6 +67,9 @@ Ensure Consul firewall UDP port is open:
 {% endif %}
 
 {%- if consul.service %}
+consul-chkconfig:
+  cmd.run:
+    - name: "chkconfig --add consul"
 
 consul-service:
   service.running:
