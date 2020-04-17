@@ -4,7 +4,7 @@
 {% if grains['os'] != 'Windows' %}
 consul-init-file:
   file.managed:
-    {%- if salt['test.provider']('service') == 'systemd' %}
+    {%- if salt['test.provider']('service') == 'systemd_service' %}
     - source: salt://{{ slspath }}/files/consul.service
     - name: /etc/systemd/system/consul.service
     - mode: 0644
