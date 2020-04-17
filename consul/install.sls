@@ -70,6 +70,11 @@ consul-install:
     - watch:
       - archive: consul-extract
 
+consul-allow-permission:
+    cmd.run:
+      - name: setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/consul-{{ consul.version }}
+      -
+
 consul-clean:
   file.absent:
     - name: {{ consul.temp_dir }}/consul_{{ consul.version }}_{{ consul.os }}_{{ consul.arch }}.zip
