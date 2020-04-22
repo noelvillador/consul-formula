@@ -70,10 +70,12 @@ consul-install:
     - watch:
       - archive: consul-extract
 
+{% if grains['os'] != 'Windows' %}
 consul-allow-permission:
     cmd.run:
       - name: setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/consul-{{ consul.version }}
-      -
+{% endif %}
+
 
 consul-clean:
   file.absent:
